@@ -1,0 +1,108 @@
+<?
+
+
+
+class xmlFile_AD extends FileSystem
+{
+
+    #internal variables
+    public $children = array();
+    public $parent = array();
+    public $kid;
+    public $nodes = array();
+    private $xmlDatbasePath;
+    private $xmlResourcePath;
+    private $xmlObject;
+
+    #        Constructor
+    function __construct()
+    {
+        # code...
+        $this->xmlResourcePath = RSOURCES_PATH;
+        $this->xmlDatbasePath = $this->xmlResourcePath . 'database' . DS;
+
+    }
+
+    function writeToXmlDOM($array, $file_name_path = null, $rootElement = null)
+    {
+        $returnData = false;
+
+        $dom = new DOMDocument();
+        $elements = $this->createXml($array);
+
+        if (isset($rootElement) && (trim($rootElement) != '')) {
+            $xml_data = $dom->saveXML() . "<$rootElement>" . $elements . "
+</$rootElement>";
+
+        } else {
+            $xml_data = $dom->saveXML() . $elements;
+        }
+
+        if (isset($file_name_path) && (trim($file_name_path) != '')) {
+            trim($file_name_path);
+            str_replace('\\', '/', $file_name_path);
+            $fileD = explode('/', $file_name_path);
+            $last = trim(array_pop($fileD));
+            $file_name_path = trim(str_replace($last, '', $file_name_path));
+            if (trim($last) == '') {
+                $returnData = true;
+            } else {
+
+                $f = explode('.', $last);
+                if ($f[count($f) - 1] != 'xml'):
+                    $last = $last . '.xml';
+                endif;
+
+                if (touch($file_name_path . $last)) {
+                    file_put_contents($file_name_path . $last, $xml_data);
+                    return true;
+
+                }
+            }
+
+        }
+    }
+
+
+    function createXml($array_values)
+    {
+        //file_
+        if (!is_array($array_values)) {
+            echo "<p><b>Can't Parse</b> <i>$array_values</i><b> to xml. Make sure input an array.</b></p>";
+        } else {
+            foreach ($array_values as $ft => $each) {
+                if (is_array($array_values[$ft])) {
+                    if (is_int($ft)) {
+                        $this->kid .= '
+<illValue>';
+                    } else {
+                        $this->kid .= "
+<$ft>";
+                    }
+                    $this->createXml($array_values[$ft]);
+
+                    if (is_int($ft)) {
+                        $this->kid .= '
+</illValue>';
+                    } else {
+                        $this->kid .= "
+</$ft>
+";
+                    }
+                } else {
+                    if (is_int($ft)) {
+                        $this->kid .= "
+<illValue>$each</illValue>";
+                    } else {
+                        $this->kid .= "
+    <$ft>$each</$ft>
+";
+                    }
+                }
+            }
+            return $this->kid;
+        }
+    }
+
+
+}

@@ -1,0 +1,706 @@
+<?
+class MYSQL_AD
+{
+    public $last_query;
+    private $magic_quotes_active;
+    private $real_escape_string_exists;
+    public $table;
+    private $connection;
+    public $q_equal_variant_separator = ',';
+    public $q_equal_separator = '|';
+    public $select_options = array('order by' => '', 'group by' => '', 'limit' => '');
+
+    #        Constructor
+    function __construct($auto_connect = null)
+    {
+        # code...
+        $this->magic_quotes_active = get_magic_quotes_gpc();
+        $this->real_escape_string_exists = function_exists("mysql_real_escape_string");
+        if($auto_connect == true){
+            $this->auto_connect();
+        }
+    }
+
+    function __destruct()
+    {
+        $this->disconnect($this->connection);
+    }
+
+    function auto_connect()
+    {
+        $this->connection = $this->connect_full(HOST, USERNAME, PASSWORD, DATABASE);
+    }
+
+    function table()
+    {
+        return $this->table = strtolower(get_class($this));
+    }
+
+
+    /** Connects to database **/
+    function connect($address, $account, $pwd, $name)
+    {
+        $this->connection = @mysql_connect($address, $account, $pwd);
+        if ($this->connection != 0) {
+            if (mysql_select_db($name, $this->connection)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return 0;
+        }
+    }
+
+    /** Disconnects from database **/
+
+    function disconnect()
+    {
+        if (@mysql_close($this->connection) != 0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    function selectAll($table)
+    {
+        $query = 'SELECT * FROM `' . $table. '`';
+        return $this->fetch_array($this->query($query));
+    }
+
+    function getAllSelf()
+    {
+        return $this->fetch_array($this->query('SELECT * FROM `' . $this->table() . '`'));
+    }
+
+
+    public function open_connection($host, $username, $password)
+    {
+        if (!$this->connection = mysql_connect($host, $username, $password)) {
+            echo mysql_error();
+        } else {
+            return true;
+        }
+    }
+
+    public function connect_full($host, $username, $password, $database)
+    {
+
+        $this->connection = $this->open_connection($host, $username, $password);
+        if (!$this->connection) {
+
+        } else {
+            $select_db = mysql_select_db($database);
+            if (!$select_db) {
+            } else {
+                return $this->connection;
+            }
+
+        }
+
+    }
+
+    function ArrayRemoveEmpty($array)
+    {
+        $array = array_filter($array);
+        return $array;
+    }
+
+    function ArrayRemoveEmptyOrder($arr)
+    {
+        $arr = array_filter($arr);
+        $newMy = array();
+        $i = 0;
+
+        foreach ($arr as $key => $value) {
+            if (!is_null($value)) {
+                $newMy[$i] = $value;
+                $i++;
+            }
+        }
+        return $newMy;
+    }
+
+
+    public function select_db($db)
+    {
+        if (isset($this->connection)) {
+            $select_db = mysql_select_db($db, $this->connection);
+            if (!$select_db) {
+                echo mysql_error();
+            } else {
+                return true;
+            }
+        } else {
+            echo '<p><b>' . $this->table() .
+                '- parent MYSQL_AD:</b> Could not connect to host. Make sure host connection is established first</p>';
+        }
+    }
+
+    public function select_db1($db)
+    {
+        if (isset($this->connection)) {
+            $select_db = mysql_select_db($db);
+            if (!$select_db) {
+                die(mysql_error());
+            } else {
+                return true;
+            }
+        } else {
+            echo '<p><b>' . $this->table() .
+                '- parent MYSQL_AD:</b> Could not connect to host. Make sure host connection is established first</p>';
+        }
+
+    }
+
+    public function close_connection()
+    {
+        if (isset($this->connection)) {
+            mysql_close($this->connection);
+            unset($this->connection);
+        } else {
+            return true;
+        }
+
+    }
+
+    public function query($query)
+    {
+        $this->last_query = $query;
+        if(!$result = mysql_query($query))
+        {
+            echo mysql_error();
+        }
+        if($this->confirm_query($result)){
+            return $result;
+        }else{
+            return false;
+        }
+    }
+
+
+    private function confirm_query($result)
+    {
+
+        if (!$result) {
+            echo '
+            <br /><br />
+            <b>' . $this->table() .
+                ":</b> Could not process last database query. Please check query and try again later.<p>" .
+                "Error from Mysql: " . mysql_error() . "</br>" . "<p>Query: " . $output .= $this->
+                last_query . "</p>";
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public function escape_values($value)
+    {
+
+        //php versions >= 4.3.0
+        if ($this->real_escape_string_exists) {
+            if ($magic_quotes_active) {
+                $value = stripslashes($value);
+            }
+            $value = mysql_real_escape_string(trim($value));
+        }
+        // php verisons before 4.3.0
+        else {
+            //if magic quotes arent already on then add slashes manually
+            if (!$this->magic_quotes_active) {
+                $value = addslashes(trim($value));
+            }
+        }
+        return $value;
+    }
+
+    public function auto_escape_values($params_array)
+    {   if(!empty($params_array)):
+
+        foreach ($params_array as $param => $value) {
+            self::escape_values($value);
+        }
+        endif;
+        return $params_array;
+
+    }
+
+    public function fetch_single_result($result){
+        return mysql_fetch_array($result);
+    }
+
+    public function find_single_entry($query){
+        return $this->fetch_single_result($this->query($query));
+        }
+
+     public function selectSingleEntry($query){
+        return $this->fetch_single_result($this->query($query));
+        }
+
+    public function fetch_array($result)
+    {
+
+        $result_array = array();
+        for ($i = 0; $row = mysql_fetch_array($result); $i++) {
+            $result_array[$i] = $row;
+        }
+        return $result_array;
+
+    }
+
+    public function num_rows($result)
+    {
+
+        return mysql_num_rows($result);
+
+    }
+
+    public function insertID()
+    {
+
+        return mysql_insert_id();
+
+    }
+
+    public function affected_rows()
+    {
+
+        return mysql_affected_rows($this->connection);
+
+    }
+
+    /**
+     * Auto beta Genric Methods
+     * //params $params = array() 1st index level
+     */
+    public function autoInsert($table, $params)
+    {
+
+        $query = "INSERT INTO `{$table}`(";
+        if (is_array($params)) {
+            $params = $this->ArrayRemoveEmpty($params);
+            $count = count($params) - 1;
+            $i = 0;
+
+            foreach ($params as $param => $value) {
+                if ($i != $count) {
+                    $query .= " `{$param}`,";
+                    $i++;
+
+                } else {
+                    $query .= " `{$param}`)";
+                    $done = 1;
+                }
+                if ($done == 1) {
+                    $query .= " VALUES (";
+                    $i = 0;
+                    foreach ($params as $param) {
+                        if ($i != $count) {
+                            $query .= "'" . $this->escape_values($param) . "',";
+                            $i++;
+                        } else {
+                            $query .= "'" . $this->escape_values($param) . "'";
+                        }
+                    }
+                    $query .= ")";
+                }
+            }
+            if ($this->query($query)) {
+                return true;
+            }
+        }
+    }
+
+    /** auto update()
+     * /* @params $params = array() 1st index level. data may need to be escaped.
+     * /* @param $table
+     * //
+     * // where condition
+     */
+    public function autoUpdate($table, $params, $field, $id)
+    {
+        $query = "UPDATE `{$table}` SET";
+        if (is_array($params)) {
+            $params = $this->ArrayRemoveEmpty($params);
+            $count = count($params) - 1;
+            $i = 0;
+            foreach ($params as $param => $value) {
+
+                if ($i != $count) {
+                    $query .= " `{$param}` = '".$this->escape_values($value)."',";
+
+                    $i++;
+                } else {
+                    $query .= " `{$param}` = '".$this->escape_values($value)."'";
+                }
+            }
+        }
+
+        $query .= " WHERE `{$field}` = {$id}";
+
+        if ($this->query($query)) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
+    //auto strip and safe for sql
+
+    public function completeAutoInsert($table, $params)
+    {
+        $params = $this->auto_escape_values($params);
+        return $this->autoInsert($table, $params);
+    }
+
+    public function completeAutoInsertSelf($params)
+    {
+        return $this->completeAutoInsert($this->table(), $params);
+    }
+
+    //auto strip and safe for sql then update b
+    /** auto update()
+     * /* @params $params = array() 1st index level. data does not need to be escaped.
+     * /* @param $table
+     * //
+     * // where condition
+     */
+    public function completeAutoUpdate($table, $params, $field, $id)
+    {
+        $params = $this->auto_escape_values($params);
+        return $this->autoUpdate($table, $params, $field, $id);
+    }
+
+    public function completeAutoUpdateSelf($params, $field, $id)
+    {
+        return $this->completeAutoUpdate($this->table(), $params, $field, $id);
+    }
+
+
+    //Genric Methods
+    public function findAllById($table, $id_field, $id)
+    {
+        $id = $this->escape_values($id);
+        $query = "SELECT * FROM `{$table}` where `{$id_field}` = '{$id}'";
+        return $this->fetch_array($this->query($query));
+    }
+
+    public function findById($table, $id_field, $id)
+    {
+        $id = $this->escape_values($id);
+        return $this->select($table, "$id_field | $id", 'LIMIT 1');
+    }
+
+    public function select($tables = null, $where = null, $options = null, $additional_where = null)
+    {
+        $query = $this->selectQuery($tables, $where, $options, $additional_where);
+        return $this->fetch_array($this->query($query));
+    }
+
+    function count($query)
+    {
+        return count($this->fetch_array($this->query($query)));
+    }
+
+
+    public function selectAllPaginate($tablesFieldsArray, $where = null, $options_array = null,
+        $per_page = 1, $offset = 1)
+    {
+
+        $ops = array('limit' => $per_page, 'offset' => $offset);
+        if (isset($options_array)):
+            if(is_array($options_array)){
+            $ops = array_merge($ops, $options_array);
+            }else{
+                $ops = $options_array;
+            }
+        endif;
+
+        return $this->select($tablesFieldsArray, $where, $ops);
+    }
+
+
+    public function deleteByField($table, $field, $id)
+    {
+        $id = $this->escape_values($id);
+        $query = "DELETE FROM `{$table}` where `{$field}` = {$id}";
+        return ($this->query($query));
+    }
+
+    public static function countAll($table)
+    {
+        global $db;
+        $query = "SELECT COUNT(*) FROM `{$table}` ";
+        $db->connect_db();
+        $result = array_shift(array_shift($db->fetch_array($db->query($query))));
+        return $result;
+    }
+
+
+    /**
+     * @author skipper
+     * Special Function that auto sets up select queries
+     * @param $tables_array e.g.'inbox'=>array('letter_id','subject'),'outbox'=>array('letter_id'),'comment'=>('')
+     * @param $where  e.g.'inbox.letter_id | outbox.letter_id, inbox.letter_id | '
+     */
+    function selectQuery($tables_array = null, $where = null, $options = null, $additional_where = null,
+        $additional_options = null)
+    {
+        $wrong_table_msg = '<b>' . $this->table() .
+            " - parent MYSQL_AD:</b> Query parameters provided are inconsistent.\n Make sure tables are all arrays or tables.
+        \n Tables as arrays should not be empty.";
+
+        //Initializing checkers count
+        //collects paired table and feild as array
+        $table_field_mapping = array();
+        $wrong_tables = array();
+        $inconsistancy = 0;
+        $table_set_array = 0;
+
+        //Checking is tables array is all arrays or all strings
+
+        //Here starts to check if the first element is an array the compares if the remaining are arrays.
+        if (is_array($tables_array)) {
+            //first get the keys so we can access the first
+            $keys = array_keys($tables_array);
+
+            //check if its an array.if it is compare the rest and sets error message if required
+            if (is_array($tables_array[$keys[0]])) {
+                //setting query mode for arrayed tables
+                $table_set_array = 1;
+                //comparison
+                foreach ($tables_array as $table => $values) {
+                    if (!is_array($tables_array[$table]) || empty($tables_array[$table])) {
+                        array_push($wrong_tables, $table);
+                        $inconsistancy++;
+
+                    }
+                }
+            }
+            //if tables are in string form.. same process
+            elseif (!is_array($tables_array[$keys[0]])) {
+                //comparison
+                foreach ($tables_array as $table => $values) {
+                    if (is_array($tables_array[$table])) {
+                        array_unshift($wrong_tables, $table);
+                        $inconsistancy++;
+
+                    }
+                }
+            }
+        }
+
+        //msseage sets here
+        if ($inconsistancy > 0) {
+            $wrong_table_msg .= " Tables : ";
+            foreach ($wrong_tables as $tb) {
+                $wrong_table_msg .= "$tb, ";
+                echo $wrong_table_msg;
+            }
+
+            //second phase. fishing out and pairing tables with fields
+        } elseif ($inconsistancy == 0) {
+
+            if (is_array($tables_array[$keys[0]])) {
+
+                $wrong_table_msg .= "\n Cannot continue query. Tables fields are empty. Empty tables: ";
+
+                foreach ($tables_array as $table => $values) {
+                    if (isset($values)) {
+                        if (count($tables_array[$table]) > 0) {
+                            foreach ($tables_array[$table] as $field) {
+                                if (trim($field) != '') {
+                                    array_push($table_field_mapping, "{$table}" . ".{$field}");
+                                } 
+                            }
+                        }
+                    }
+                }
+
+                $wrong_tables = array_unique($wrong_tables);
+            } else {
+
+            }
+        }
+
+        if ($inconsistancy > 0) {
+            foreach ($wrong_tables as $tb):
+                $wrong_table_msg .= "$tb, ";
+            endforeach;
+            echo $wrong_table_msg;
+
+        }
+        //if all tests pass til here start builoding select query
+        elseif ($inconsistancy == 0) {
+            ///When tables got have specific fields.. arrayed.
+            if ($table_set_array == 1) {
+                $count = count($table_field_mapping) - 1;
+                $i = 0;
+                foreach ($table_field_mapping as $table_field) {
+                    if ($i != $count) {
+                        //    $query .= " `{$table_field}`,";
+                        $i++;
+                    } else {
+                        //     $query .= " `{$table_field}` ";
+                    }
+                }
+            }
+
+            if (isset($where) && trim($where) != '') {
+                $where = $this->sort_where($where . ', ');
+            }
+
+
+            if (isset($options) && !empty($options)) {
+                $options = $this->sort_options($options);
+            }
+        }
+
+
+        //Setting up Query
+
+        $query = "SELECT ";
+
+        if (is_array($tables_array[$keys[0]])) {
+            $query .= implode(', ', $table_field_mapping);
+        }
+
+        if (is_array($tables_array[$keys[0]])) {
+            $query .= " FROM ";
+            //  $keys = array_reverse($keys);
+            $count = count($keys);
+            for ($i = 0; $i < $count; $i++) {
+                if ($i < ($count - 1)) {
+                    $query .= ' ' . $keys[$i] . ', ';
+                } else {
+                    $query .= ' ' . $keys[$i] . ' ';
+                }
+            }
+        } else {
+            $query .= " * FROM ";
+            $query .= " " . $tables_array . " ";
+        }
+
+        if (isset($where) && !empty($where)) {
+            $count = count($where);
+            $query .= ' WHERE ';
+
+            for ($i = 0; $i < $count; $i++) {
+                if ($i < ($count - 1)) {
+                    $query .= ' ' . $where[$i] . ' AND ';
+                } else {
+                    $query .= ' ' . $where[$i] . ' ';
+                }
+            }
+        }
+
+
+        if (count($options) > 0) {
+            foreach ($options as $option) {
+                $query .= " $option ";
+            }
+        }
+        return $query;
+
+    }
+
+
+    function sort_where($where)
+    {
+        if ($parted_where = explode($this->q_equal_variant_separator, $where)) {
+            $arrayed_where = array();
+            if (!(preg_match('/[' . $this->q_equal_separator . ']/', $where) && preg_match('/[' .
+                $this->q_equal_variant_separator . ']/', $where))) {
+                echo '<b>' . $this->table .
+                    "-MYSQL_AD: 'WHERE' parameters cannot be empty. Should be in the form 'table1.field | value, table1.field | value'.
+                                <br /> Tables can also refer other table values i.e. 'table1.field | table.field, table1.field | value'.
+                                <br />" . $this->q_equal_variant_separator .
+                    " - specifies induvidual where blocks.
+                                <br />" . $this->q_equal_separator .
+                    " - specifies '=' in where statements.
+                                </b>
+                                <br />
+                        <span style=\"color:red;\">Parameter: $where</span>.<br /><br />";
+            } else {
+                foreach ($parted_where as $added_where) {
+                    $exploded_added_where = explode($this->q_equal_separator, $added_where);
+                    if (!($exploded_added_where[0] == '' || $exploded_added_where[1] == '')) {
+                        array_push($arrayed_where, "{$exploded_added_where[0]} = {$exploded_added_where[1]}");
+
+                    }
+
+                }
+            }
+        }
+
+        return $arrayed_where;
+
+    }
+
+    /**
+     *Sorts out various sql options e.g. LIKE, ORDER BY,GROUP BY
+     * @param array of the form option=>value,values or just value
+     */
+    function sort_options($options)
+    {
+        $option_statments = array();
+
+        if (is_array($options)) {
+            $this->select_options = ArrayRemoveEmpty((array_merge($this->select_options, $options)));
+            if (count($this->select_options) > 0) {
+                foreach ($this->select_options as $option => $values) {
+                    array_push($option_statments, strtoupper($option) . ' ' . $values);
+                }
+            }
+        } else {
+
+            array_push($option_statments, str_replace($this->q_equal_variant_separator, ',',
+                $options));
+        }
+        return $option_statments;
+
+    }
+
+
+    /**
+     * Miscellaneous fnxs
+     */
+
+    function filterOutArrayIndexed($array)
+    {
+        $filtered_array = array();
+        if (is_array($array)) {
+            foreach ($array as $arr => $value) {
+
+                if (!is_int($arr)) {
+                    $filtered_array[$arr] = $value;
+                }
+            }
+            return $filtered_array;
+        } else {
+            return false;
+        }
+    }
+
+    function filterOutArrayNonIndexed($array)
+    {
+        $filtered_array = array();
+        if (is_array($array)) {
+            foreach ($array as $arr => $value) {
+                if (is_int($arr)) {
+                    $filtered_array[$arr] = $value;
+                }
+            }
+            return $filtered_array;
+        } else {
+            return false;
+        }
+    }
+
+    ##########
+    # End of class
+}
+?>

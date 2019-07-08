@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+Options +FollowSymLinks
+RewriteEngine On
+RewriteBase /aztrasc/
+RewriteRule !(\.gif|\.png|\.jpe?g|\.css|\.js|\.php|^public/.*)$ index.php [nocase,last]
+</IfModule>

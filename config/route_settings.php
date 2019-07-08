@@ -1,0 +1,3 @@
+<?
+$_SERVER['scRouteConfig'] = 'On'
+?>

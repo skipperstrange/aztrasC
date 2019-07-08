@@ -1,0 +1,26 @@
+This is a templating class m currently tryin to work on.
+It its main role is to handle the applicatio route dynamics for links among others.
+
+i will need help and support but 
+i will do what i can
+
+. The class name is stpHtml.
+It has several functions that can be used to layout a page.
+development is still in progress.
+
+
+to use: 
+1. require the stp.php file in ur script
+
+	1 e. g.
+		require_once 'stp.php';
+
+
+2. create a new instance of any of the html class controls when u want to use    it.
+
+	2 e. g.
+		$html = new stpHtml;
+		$forms = new stpForms;
+		etc.
+
+stp.php can be manually edited to get access to other template controlers.

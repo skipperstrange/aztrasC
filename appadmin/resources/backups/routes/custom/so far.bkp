@@ -1,0 +1,105 @@
+<?php
+$_SERVER['scROUTES'] = array(
+//# controller:weeklyfoto view:index
+array('url'=>'@^home$@', 'controller'=>'weeklyfoto', 'view'=>'index'),
+
+//# controller:weeklyfoto view:index
+array('url'=>'@^home/$@', 'controller'=>'weeklyfoto', 'view'=>'index'),
+
+//# controller:weeklyfoto view:index
+array('url'=>'@^$@', 'controller'=>'weeklyfoto', 'view'=>'index'),
+
+//# controller:weeklyfoto view:view
+array('url'=>'@^view/(?P<foto>\w+)/$@', 'view'=>'view', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:view
+array('url'=>'@^view/(?P<foto>\w+)$@', 'controller'=>'weeklyfoto', 'view'=>'view'),
+
+//# controller:weeklyfoto view:themes
+array('url'=>'@^themes/$@', 'view'=>'themes', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:themes
+array('url'=>'@^themes$@', 'controller'=>'weeklyfoto', 'view'=>'themes'),
+
+//# controller:weeklyfoto view:theme
+array('url'=>'@^theme/(?P<themeid>\w+)/$@', 'view'=>'theme', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:theme
+array('url'=>'@^theme/(?P<themeid>\w+)$@', 'controller'=>'weeklyfoto', 'view'=>'theme'),
+
+//# controller:admin view:index
+array('url'=>'@^index/(?P<show>\w+)/(?P<status>\w+)/$@', 'controller'=>'admin', 'view'=>'index'),
+
+//# controller:admin view:index
+array('url'=>'@^index/(?P<show>\w+)/(?P<status>\w+)$@', 'controller'=>'admin', 'view'=>'index'),
+
+//# controller:weeklyfoto view:tag
+array('url'=>'@^tag/(?P<tagid>\w+)/$@', 'view'=>'tag', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:tag
+array('url'=>'@^tag/(?P<tagid>\w+)$@', 'controller'=>'weeklyfoto', 'view'=>'tag'),
+
+//# controller:weeklyfoto view:tagcloud
+array('url'=>'@^tagcloud/$@', 'view'=>'tagcloud', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:tagcloud
+array('url'=>'@^tagcloud$@', 'controller'=>'weeklyfoto', 'view'=>'tagcloud'),
+
+//# controller:weeklyfoto view:add
+array('url'=>'@^add/$@', 'view'=>'add', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:add
+array('url'=>'@^add$@', 'controller'=>'weeklyfoto', 'view'=>'add'),
+
+//# controller:weeklyfoto view:tagcloud
+array('url'=>'@^tag/$@', 'controller'=>'weeklyfoto', 'view'=>'tagcloud'),
+
+//# controller:weeklyfoto view:tagcloud
+array('url'=>'@^tag$@', 'controller'=>'weeklyfoto', 'view'=>'tagcloud'),
+
+//# controller:weeklyfoto view:view
+array('url'=>'@^view/(?P<foto>\w+)/(?P<vote>\w+)/(?P<download>\w+)/$@', 'view'=>'view', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:view
+array('url'=>'@^view/(?P<foto>\w+)/(?P<vote>\w+)/(?P<download>\w+)$@', 'controller'=>'weeklyfoto', 'view'=>'view'),
+
+//# controller:weeklyfoto view:view
+array('url'=>'@^view/(?P<foto>\w+)/(?P<vote>\w+)/$@', 'view'=>'view', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:view
+array('url'=>'@^view/(?P<foto>\w+)/(?P<vote>\w+)$@', 'controller'=>'weeklyfoto', 'view'=>'view'),
+
+//# controller:weeklyfoto view:logout
+array('url'=>'@^logout/$@', 'view'=>'logout', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:logout
+array('url'=>'@^logout$@', 'controller'=>'weeklyfoto', 'view'=>'logout'),
+
+//# controller:weeklyfoto view:index
+array('url'=>'@^index$@', 'controller'=>'weeklyfoto', 'view'=>'index'),
+
+//# controller:weeklyfoto view:index
+array('url'=>'@^index/$@', 'controller'=>'weeklyfoto', 'view'=>'index'),
+
+//# controller:weeklyfoto view:radmin
+array('url'=>'@^radmin$@', 'controller'=>'weeklyfoto', 'view'=>'radmin'),
+
+//# controller:weeklyfoto view:radmin
+array('url'=>'@^radmin/$@', 'controller'=>'weeklyfoto', 'view'=>'radmin'),
+
+//# controller:weeklyfoto view:register
+array('url'=>'@^register/$@', 'view'=>'register', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:register
+array('url'=>'@^register$@', 'controller'=>'weeklyfoto', 'view'=>'register'),
+
+//# controller:weeklyfoto view:view
+array('url'=>'@^view/(?P<foto>\w+)/(?P<download>\w+)/$@', 'view'=>'view', 'controller'=>'weeklyfoto'),
+
+//# controller:weeklyfoto view:view
+array('url'=>'@^view/(?P<foto>\w+)/(?P<download>\w+)$@', 'controller'=>'weeklyfoto', 'view'=>'view'),
+
+#end of routes
+);
+
+?>
